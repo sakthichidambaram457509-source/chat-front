@@ -1,32 +1,37 @@
-import { useEffect, useState, useRef } from "react"; // 🟢 Added useRef
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Client } from "@stomp/stompjs";
+
+import ChatHeader from "./ChatHeader";
+import MessageBubble from "./MessageBubble";
+import MessageInput from "./MessageInput";
 
 function ChatWindow({ currentUserId, selectedUser }) {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
   const [client, setClient] = useState(null);
-  
-  const [isLoadingMessages, setIsLoadingMessages] = useState(false); // 🟢 Added loading state
-  const messagesEndRef = useRef(null); // 🟢 Added ref for auto-scroll
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+
+  const messagesEndRef = useRef(null);
 
   const token = localStorage.getItem("token");
 
-  // 🟢 Auto-scroll function
+  // Auto Scroll
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
   };
 
-  // 🟢 Trigger auto-scroll whenever 'messages' array changes
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  // Load old messages
+  // Load Chat History
   useEffect(() => {
     if (!selectedUser) return;
 
-    setIsLoadingMessages(true); // 🟢 Start loading when user is selected
+    setIsLoadingMessages(true);
 
     axios
       .get(
@@ -37,12 +42,16 @@ function ChatWindow({ currentUserId, selectedUser }) {
           },
         }
       )
-      .then((res) => setMessages(res.data))
-      .catch((err) => console.log(err))
-      .finally(() => setIsLoadingMessages(false)); // 🟢 Stop loading
+      .then((res) => {
+        setMessages(res.data);
+      })
+      .catch(console.log)
+      .finally(() => {
+        setIsLoadingMessages(false);
+      });
   }, [selectedUser, currentUserId]);
 
-  // WebSocket Connection
+  // WebSocket
   useEffect(() => {
     const stompClient = new Client({
       brokerURL: `ws://localhost:8080/chat?token=${token}`,
@@ -54,21 +63,21 @@ function ChatWindow({ currentUserId, selectedUser }) {
 
       stompClient.subscribe("/topic/messages", (msg) => {
         const newMessage = JSON.parse(msg.body);
-        console.log("WS MESSAGE:");
+
+        console.log("WS MESSAGE:", newMessage);
+
         setMessages((prev) => [...prev, newMessage]);
       });
     };
 
     stompClient.onStompError = (frame) => {
-      console.log("STOMP ERROR:", frame);
+      console.log(frame);
     };
 
     stompClient.activate();
     setClient(stompClient);
 
-    return () => {
-      stompClient.deactivate();
-    };
+    return () => stompClient.deactivate();
   }, []);
 
   // Send Message
@@ -88,79 +97,45 @@ function ChatWindow({ currentUserId, selectedUser }) {
   };
 
   if (!selectedUser) {
-    return <div className="h-screen flex items-center justify-center text-gray-500">Select a user to start chatting</div>;
+    return (
+      <div className="h-full flex items-center justify-center text-gray-500">
+        Select a user to start chatting
+      </div>
+    );
   }
 
   return (
-    <div className="h-screen flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b bg-white shadow z-10">
-        <h2 className="text-xl font-semibold">{selectedUser.username}</h2>
-      </div>
+    <div className="h-full flex flex-col">
 
-      {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-2 bg-gray-100">
-        
-        {/* 🟢 Show Loading Spinner if fetching messages */}
+      <ChatHeader user={selectedUser} />
+
+      <div className="flex-1 overflow-y-auto bg-slate-100 p-6 flex flex-col gap-3">
+
         {isLoadingMessages ? (
-          <div className="flex-1 flex justify-center items-center">
-            <svg className="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : (
           <>
-            {messages.map((msg, index) => (
-              <div
-                key={msg.id || index}
-                className={`max-w-xs px-4 py-2 rounded-lg shadow-sm ${
-                  msg.sender?.id === currentUserId
-                    ? "bg-green-300 self-end"
-                    : "bg-white self-start"
-                }`}
-              >
-                <div>{msg.content}</div>
-
-                <div className="text-xs text-gray-600 mt-1 text-right">
-                  {msg.timestamp
-                    ? new Date(msg.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })
-                    : ""}
-                </div>
-              </div>
+            {messages.map((msg) => (
+              <MessageBubble
+                key={msg.id}
+                msg={msg}
+                isMine={msg.sender?.id === currentUserId}
+              />
             ))}
-            {/* 🟢 Invisible element to scroll to */}
-            <div ref={messagesEndRef} />
+
+            <div ref={messagesEndRef}></div>
           </>
         )}
       </div>
 
-      {/* Input Form */}
-      <form 
-        className="p-4 border-t flex gap-2 bg-white"
-        onSubmit={(e) => {
-          e.preventDefault(); // 🟢 Pressing 'Enter' key will now send the message!
-          sendMessage();
-        }}
-      >
-        <input
-          type="text"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type a message..."
-          className="flex-1 border rounded-lg px-4 py-2 outline-none focus:ring-2 focus:ring-blue-300"
-        />
+      <MessageInput
+        message={message}
+        setMessage={setMessage}
+        sendMessage={sendMessage}
+      />
 
-        <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-600 transition-colors text-white px-5 py-2 rounded-lg font-medium"
-        >
-          Send
-        </button>
-      </form>
     </div>
   );
 }

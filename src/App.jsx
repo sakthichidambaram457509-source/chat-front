@@ -69,9 +69,10 @@ function App() {
         {/* User List */}
         <div className="w-1/4 border-r bg-gray-100">
           <UserList
-            onSelectUser={setSelectedUser}
-            currentUserId={user.id}
-          />
+  onSelectUser={setSelectedUser}
+  currentUserId={user.id}
+  selectedUser={selectedUser}
+/>
         </div>
 
         {/* Chat Window */}
