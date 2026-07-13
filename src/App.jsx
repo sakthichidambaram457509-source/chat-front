@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Login from "./pages/Login";
 import UserList from "./components/UserList";
-import ChatWindow from "./components/ChatWindow";
+import ChatWindow from "./components/Chatwindow";
 import Register from "./pages/Register";
 
 function App() {
