@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Login from "./pages/Login";
-import UserList from "./components/UserList";
+import UserList from "./components/Userlist";
 import ChatWindow from "./components/Chatwindow";
 import Register from "./pages/Register";
 
