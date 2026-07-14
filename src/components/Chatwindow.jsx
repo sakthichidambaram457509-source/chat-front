@@ -35,7 +35,7 @@ function ChatWindow({ currentUserId, selectedUser }) {
 
     axios
       .get(
-        `http://localhost:8080/messages/chat?senderId=${currentUserId}&receiverId=${selectedUser.id}`,
+        `https://chat-6oy5.onrender.com/messages/chat?senderId=${currentUserId}&receiverId=${selectedUser.id}`,
         {
           headers: {
             Authorization: token,
@@ -54,7 +54,7 @@ function ChatWindow({ currentUserId, selectedUser }) {
   // WebSocket
   useEffect(() => {
     const stompClient = new Client({
-      brokerURL: `ws://localhost:8080/chat?token=${token}`,
+      brokerURL: `wss://chat-6oy5.onrender.com/chat?token=${token}`,
       reconnectDelay: 5000,
     });
 

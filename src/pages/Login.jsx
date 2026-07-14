@@ -8,7 +8,7 @@ function Login({ onLogin, onShowRegister }) {
   const login = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:8080/auth/login",
+        "https://chat-6oy5.onrender.com/auth/login",
         {
           username,
           password

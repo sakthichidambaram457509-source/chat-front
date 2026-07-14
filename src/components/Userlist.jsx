@@ -14,7 +14,7 @@ function UserList({
 
   useEffect(() => {
     axios
-      .get("http://localhost:8080/users", {
+      .get("https://chat-6oy5.onrender.com/users", {
         headers: {
           Authorization: token,
         },

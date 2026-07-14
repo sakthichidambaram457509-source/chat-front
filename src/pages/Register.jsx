@@ -16,7 +16,7 @@ function Register({ onBack }) {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/auth/register",
+        "https://chat-6oy5.onrender.com/auth/register",
         {
           username,
           email,
