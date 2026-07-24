@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import UserCard from "./UserCard";
+import { API_BASE_URL } from "../config/api";
 
 function UserList({
   onSelectUser,
@@ -14,7 +15,7 @@ function UserList({
 
   useEffect(() => {
     axios
-      .get("https://chat-6oy5.onrender.com/users", {
+      .get(`${API_BASE_URL}/users`, {
         headers: {
           Authorization: token,
         },

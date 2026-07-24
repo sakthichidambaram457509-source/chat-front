@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 
 function Login({ onLogin, onShowRegister }) {
   const [username, setUsername] = useState("");
@@ -8,7 +9,7 @@ function Login({ onLogin, onShowRegister }) {
   const login = async () => {
     try {
       const res = await axios.post(
-        "https://chat-6oy5.onrender.com/auth/login",
+        `${API_BASE_URL}/auth/login`,
         {
           username,
           password

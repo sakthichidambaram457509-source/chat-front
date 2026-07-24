@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { Client } from "@stomp/stompjs";
+import { API_BASE_URL, WS_BASE_URL } from "../config/api";
 
 import ChatHeader from "./ChatHeader";
 import MessageBubble from "./MessageBubble";
@@ -35,7 +36,7 @@ function ChatWindow({ currentUserId, selectedUser }) {
 
     axios
       .get(
-        `https://chat-6oy5.onrender.com/messages/chat?senderId=${currentUserId}&receiverId=${selectedUser.id}`,
+        `${API_BASE_URL}/messages/chat?senderId=${currentUserId}&receiverId=${selectedUser.id}`,
         {
           headers: {
             Authorization: token,
@@ -54,7 +55,7 @@ function ChatWindow({ currentUserId, selectedUser }) {
   // WebSocket
   useEffect(() => {
     const stompClient = new Client({
-      brokerURL: `wss://chat-6oy5.onrender.com/chat?token=${token}`,
+      brokerURL: `${WS_BASE_URL}/chat?token=${token}`,
       reconnectDelay: 5000,
     });
 

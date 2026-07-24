@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config/api";
 
 function Register({ onBack }) {
   const [username, setUsername] = useState("");
@@ -16,7 +17,7 @@ function Register({ onBack }) {
 
     try {
       const res = await axios.post(
-        "https://chat-6oy5.onrender.com/auth/register",
+        `${API_BASE_URL}/auth/register`,
         {
           username,
           email,
