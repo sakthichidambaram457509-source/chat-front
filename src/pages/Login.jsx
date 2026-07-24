@@ -34,7 +34,12 @@ function Login({ onLogin, onShowRegister }) {
       onLogin(res.data);
 
     } catch (err) {
-      alert("Invalid Credentials");
+      const serverMessage = err.response?.data?.message || err.response?.data || "Invalid Credentials";
+      if (serverMessage === "User Not Found") {
+        alert("User Not Found. Please click 'Create Account' to register first!");
+      } else {
+        alert(serverMessage);
+      }
     }
   };
 
