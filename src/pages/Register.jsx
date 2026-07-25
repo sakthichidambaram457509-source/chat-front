@@ -8,9 +8,11 @@ function Register({ onBack }) {
   const [password, setPassword] = useState("");
 
   const register = async () => {
+    const trimmedUsername = username.trim();
+    const trimmedEmail = email.trim();
 
     // Frontend validation
-    if (!username || !email || !password) {
+    if (!trimmedUsername || !trimmedEmail || !password) {
       alert("All fields are required");
       return;
     }
@@ -19,8 +21,8 @@ function Register({ onBack }) {
       await axios.post(
         `${API_BASE_URL}/auth/register`,
         {
-          username,
-          email,
+          username: trimmedUsername,
+          email: trimmedEmail,
           password,
         }
       );
@@ -31,8 +33,9 @@ function Register({ onBack }) {
     } catch (err) {
       console.log(err);
 
-      if (err.response) {
-        alert(err.response.data);
+      if (err.response?.data) {
+        const message = typeof err.response.data === "string" ? err.response.data : JSON.stringify(err.response.data);
+        alert(message);
       } else {
         alert("Registration Failed");
       }

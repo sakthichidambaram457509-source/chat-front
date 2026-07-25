@@ -7,12 +7,18 @@ function Login({ onLogin, onShowRegister }) {
   const [password, setPassword] = useState("");
 
   const login = async () => {
+    const trimmedUsername = username.trim();
+    if (!trimmedUsername || !password) {
+      alert("Please enter both username/email and password");
+      return;
+    }
+
     try {
       const res = await axios.post(
         `${API_BASE_URL}/auth/login`,
         {
-          username,
-          password
+          username: trimmedUsername,
+          password,
         }
       );
 
@@ -34,7 +40,8 @@ function Login({ onLogin, onShowRegister }) {
       onLogin(res.data);
 
     } catch (err) {
-      const serverMessage = err.response?.data?.message || err.response?.data || "Invalid Credentials";
+      const rawError = err.response?.data;
+      const serverMessage = typeof rawError === "string" ? rawError : (rawError?.message || "Invalid Credentials");
       if (serverMessage === "User Not Found") {
         alert("User Not Found. Please click 'Create Account' to register first!");
       } else {
