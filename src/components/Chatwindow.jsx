@@ -10,12 +10,10 @@ import MessageInput from "./MessageInput";
 function ChatWindow({ currentUserId, selectedUser }) {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState("");
-  const [client, setClient] = useState(null);
   const [isLoadingMessages, setIsLoadingMessages] = useState(false);
 
   const messagesEndRef = useRef(null);
-
-  const token = localStorage.getItem("token");
+  const clientRef = useRef(null);
 
   // Auto Scroll
   const scrollToBottom = () => {
@@ -32,7 +30,12 @@ function ChatWindow({ currentUserId, selectedUser }) {
   useEffect(() => {
     if (!selectedUser) return;
 
-    setIsLoadingMessages(true);
+    let isMounted = true;
+    queueMicrotask(() => {
+      if (isMounted) setIsLoadingMessages(true);
+    });
+
+    const token = localStorage.getItem("token");
 
     axios
       .get(
@@ -44,16 +47,25 @@ function ChatWindow({ currentUserId, selectedUser }) {
         }
       )
       .then((res) => {
-        setMessages(res.data);
+        if (isMounted) {
+          setMessages(res.data);
+        }
       })
       .catch(console.log)
       .finally(() => {
-        setIsLoadingMessages(false);
+        if (isMounted) {
+          setIsLoadingMessages(false);
+        }
       });
+
+    return () => {
+      isMounted = false;
+    };
   }, [selectedUser, currentUserId]);
 
   // WebSocket
   useEffect(() => {
+    const token = localStorage.getItem("token");
     const stompClient = new Client({
       brokerURL: `${WS_BASE_URL}/chat?token=${token}`,
       reconnectDelay: 5000,
@@ -76,16 +88,19 @@ function ChatWindow({ currentUserId, selectedUser }) {
     };
 
     stompClient.activate();
-    setClient(stompClient);
+    clientRef.current = stompClient;
 
-    return () => stompClient.deactivate();
+    return () => {
+      stompClient.deactivate();
+      clientRef.current = null;
+    };
   }, []);
 
   // Send Message
   const sendMessage = () => {
-    if (!client || !message.trim()) return;
+    if (!clientRef.current || !message.trim()) return;
 
-    client.publish({
+    clientRef.current.publish({
       destination: "/app/send",
       body: JSON.stringify({
         senderId: currentUserId,

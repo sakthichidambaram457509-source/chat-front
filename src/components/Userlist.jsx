@@ -11,9 +11,8 @@ function UserList({
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
 
-  const token = localStorage.getItem("token");
-
   useEffect(() => {
+    const token = localStorage.getItem("token");
     axios
       .get(`${API_BASE_URL}/users`, {
         headers: {

@@ -16,7 +16,7 @@ function Register({ onBack }) {
     }
 
     try {
-      const res = await axios.post(
+      await axios.post(
         `${API_BASE_URL}/auth/register`,
         {
           username,
